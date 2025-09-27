@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockWatch Pro - 관심종목 관리 & 매매타이밍 알림 서비스</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            padding: 8px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #00ffff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00ffff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .leading-stock-title {
+            color: #fff !important;
+        }
+
+        #leadingStocksTitle {
+            color: #fff;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ffff, #ffffff, #00ffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            padding: 100px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 4fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .main-dashboard {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .main-dashboard h3 {
+            color: #00ffff;
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .panel-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .stock-table th,
+        .stock-table td {
+            padding: 6px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .stock-table th {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .stock-table td {
+            color: #fff;
+        }
+
+        .positive {
+            color: #ff4444;
+        }
+
+        .negative {
+            color: #4444ff;
+        }
+
+        .neutral {
+            color: #fff;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #00ffff;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+        }
+
+        .sector-leader {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .sector-item {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .sector-name {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .sector-change {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .capital-input {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 0.8rem; /* 패딩 감소 */
+            margin-bottom: 1rem;
+            display: grid; /* Grid 레이아웃 적용 */
+            grid-template-columns: repeat(4, 1fr); /* 4칸 */
+            gap: 1rem; /* 간격 조정 */
+        }
+
+        .capital-input h3 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+            grid-column: 1 / -1; /* H3 타이틀이 전체 너비를 차지하도록 */
+        }
+
+        .notification-settings {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .notification-settings h4 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-settings p {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .settings-section {
+            padding: 100px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff4444;
+        }
+
+        .status-indicator.connected {
+            background: #00ff00;
+        }
+
+        .api-key-input {
+            position: relative;
+        }
+
+        .api-key-input input {
+            padding-right: 50px;
+        }
+
+        .toggle-visibility {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00ffff;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .test-connection {
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .api-info {
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .api-info h4 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .api-info p {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .api-info ul {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+
+        .api-info li {
+            margin-bottom: 0.3rem;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+            max-width: 600px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #00ffff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        /* About Section */
+        .about {
+            padding: 100px 0;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #00ffff;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .contact-content {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contact h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #00ffff;
+        }
+
+        .contact p {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .contact-item {
+            padding: 1.5rem;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .contact-item h3 {
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-item p {
+            color: #ccc;
+            margin: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: #000;
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        footer p {
+            color: #666;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content p {
+                font-size: 1.1rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sector-leader {
+                grid-template-columns: 1fr;
+            }
+
+            .stock-table {
+                font-size: 0.8rem;
+            }
+
+            .stock-table th,
+            .stock-table td {
+                padding: 8px 4px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sector-name {
+            color: #00ffff;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-card h3 {
+            color: #00ffff; /* 주도 섹터 및 주도주 타이틀 기본 색상 */
+        }
+
+        #leadingStocksTitle {
+            color: #fff; /* 주도주 타이틀을 흰색으로 변경 */
+        }
+
+        #leadingStocksTitle + div span {
+            color: #fff; /* 주도주 아래 종목명 흰색으로 변경 */
+        }
+
+        .sector-change {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .stock-table th:nth-child(1),
+        .stock-table th:last-child,
+        .stock-table td:last-child {
+            text-align: center;
+        }
+
+        .sort-arrow {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid #ccc;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .sort-arrow.asc {
+            transform: rotate(180deg);
+        }
+
+        .sort-arrow.desc {
+            transform: rotate(0deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">StockWatch Pro</div>
+            <ul class="nav-links">
+                <li><a href="#home">홈</a></li>
+                <li><a href="#dashboard">대시보드</a></li>
+                <li><a href="#features">서비스</a></li>
+                <li><a href="#settings">설정</a></li>
+                <li><a href="#about">회사소개</a></li>
+                <li><a href="#contact">연락처</a></li>
+            </ul>
+            <a href="#" class="login-btn">로그인</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>관심종목 관리 & 매매타이밍 알림</h1>
+            <p>귀신같은 매매타이밍을 알려주는 AI 기반 관심종목 관리 서비스. MTS 연동으로 쉽게 업로드하고, 실시간 알림으로 놓치지 마세요.</p>
+            <a href="#dashboard" class="cta-button">대시보드 시작하기</a>
+        </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="dashboard">
+        <div class="container">
+            <h2 class="section-title fade-in">관심종목 대시보드</h2>
+            
+            <!-- 운영자금 관리 -->
+            <div class="capital-input fade-in">
+                <h3>💰 운영자금 관리 (기본단위: 1,000원)</h3>
+                <div class="form-group">
+                    <label>총 운영자금 (1,000원)</label>
+                    <input type="number" id="totalCapitalInput" placeholder="예: 10000" value="10000">
+                </div>
+                <div class="form-group">
+                    <label>총 평가액 (1,000원)</label>
+                    <input type="text" id="totalValuationInput" readonly>
+                </div>
+                <div class="form-group">
+                    <label>현금 (1,000원)</label>
+                    <input type="number" id="cashInput" placeholder="예: 5000" value="5000">
+                </div>
+                <div class="form-group">
+                    <label>주식평가합계 (1,000원)</label>
+                    <input type="text" id="stockValuationSumInput" readonly>
+                </div>
+                <div class="form-group">
+                    <label>수익률 (%)</label>
+                    <input type="text" id="returnRateInput" readonly>
+                </div>
+                <div class="form-group">
+                    <label>기간 (시작일)</label>
+                    <input type="date" id="startDateInput">
+                </div>
+                <div class="form-group">
+                    <label>기간 (종료일)</label>
+                    <input type="date" id="endDateInput">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" class="btn btn-primary" style="width: 100%; height: 40px;" id="inquiryButton">조회</button>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- 메인 대시보드 -->
+                <div class="main-dashboard fade-in">
+                    <h3>📈 관심종목 현황</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <button class="btn btn-primary" onclick="openAddStockModal()">+ 종목 추가</button>
+                        <button class="btn btn-secondary" onclick="openUploadModal()">📁 MTS에서 업로드</button>
+                        <button class="btn btn-secondary" onclick="refreshData()">🔄 새로고침</button>
+                    </div>
+                    
+                    <table class="stock-table">
+                        <thead>
+                            <tr>
+                                <th data-sort-key="name" data-sort-order="asc">종목명 <span class="sort-arrow"></span></th>
+                                <th data-sort-key="currentPrice" data-sort-order="none">현재가 <span class="sort-arrow"></span></th>
+                                <th data-sort-key="changeRate" data-sort-order="none">등락율 <span class="sort-arrow"></span></th>
+                                <th data-sort-key="marketCap" data-sort-order="none">시가총액(조) <span class="sort-arrow"></span></th>
+                                <th data-sort-key="per" data-sort-order="none">PER <span class="sort-arrow"></span></th>
+                                <th data-sort-key="buyTarget" data-sort-order="none">매수목표 <span class="sort-arrow"></span></th>
+                                <th data-sort-key="sellTarget" data-sort-order="none">매도목표 <span class="sort-arrow"></span></th>
+                                <th data-sort-key="notification" data-sort-order="none">알림 <span class="sort-arrow"></span></th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody">
+                            <tr>
+                                <td>Samsung Electronics</td>
+                                <td>75,000</td>
+                                <td class="positive">+2.5%</td>
+                                <td>450조</td>
+                                <td>12.5</td>
+                                <td>70,000</td>
+                                <td>80,000</td>
+                                <td><span style="color: #00ff00;">✓</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" onclick="editStock(1)">수정</button>
+                                    <button class="btn btn-danger" onclick="deleteStock(1)">삭제</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>SK Hynix</td>
+                                <td>95,000</td>
+                                <td class="negative">-1.2%</td>
+                                <td>68조</td>
+                                <td>8.3</td>
+                                <td>90,000</td>
+                                <td>100,000</td>
+                                <td><span style="color: #ff4444;">✗</span></td>
+                                <td>
+                                    <button class="btn btn-secondary" onclick="editStock(2)">수정</button>
+                                    <button class="btn btn-danger" onclick="deleteStock(2)">삭제</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 사이드 패널 -->
+                <div class="side-panel">
+                    <!-- 주도 섹터 -->
+                    <div class="panel-card fade-in">
+                        <h3>🔥 주도 섹터</h3>
+                        <div class="sector-leader">
+                            <div class="sector-item">
+                                <div class="sector-name">반도체</div>
+                                <div class="sector-change">+3.2%</div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="sector-name">AI/빅데이터</div>
+                                <div class="sector-change">+2.8%</div>
+                            </div>
+                            <div class="sector-item">
+                                <div class="sector-name">바이오</div>
+                                <div class="sector-change">+1.9%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주도주 -->
+                    <div class="panel-card fade-in">
+                        <h3 id="leadingStocksTitle">🚀 주도주</h3>
+                        <div style="margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>삼성전자</span>
+                                <span class="positive">+2.5%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>NAVER</span>
+                                <span class="positive">+4.1%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>카카오</span>
+                                <span class="negative">-0.8%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 알림 설정 -->
+                    <div class="panel-card fade-in">
+                        <div class="notification-settings">
+                            <h4>📱 카카오톡 알림 설정</h4>
+                            <p>매수/매도 목표가 도달 시 카카오톡으로 알림을 받으세요.</p>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">알림 설정하기</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Settings Section -->
+    <section id="settings" class="settings-section">
+        <div class="container">
+            <h2 class="section-title fade-in">API 설정</h2>
+            
+            <div class="settings-grid">
+                <!-- 키움증권 API 설정 -->
+                <div class="settings-card fade-in">
+                    <h3>🔑 키움증권 REST API</h3>
+                    <div class="form-group">
+                        <label>App Key</label>
+                        <div class="api-key-input">
+                            <input type="password" id="kiwoomAppKey" placeholder="키움증권 App Key를 입력하세요">
+                            <button type="button" class="toggle-visibility" onclick="toggleApiKeyVisibility('kiwoomAppKey')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>App Secret</label>
+                        <div class="api-key-input">
+                            <input type="password" id="kiwoomAppSecret" placeholder="키움증권 App Secret을 입력하세요">
+                            <button type="button" class="toggle-visibility" onclick="toggleApiKeyVisibility('kiwoomAppSecret')">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Access Token</label>
+                        <div class="api-key-input">
+                            <input type="password" id="kiwoomAccessToken" placeholder="Access Token을 입력하세요">
+                            <button type="button" class="toggle-visibility" onclick="toggleApiKeyVisibility('kiwoomAccessToken')">👁️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="api-status">
+                        <div class="status-indicator" id="kiwoomStatus"></div>
+                        <span id="kiwoomStatusText">연결 안됨</span>
+                    </div>
+                    
+                    <button class="btn btn-primary test-connection" onclick="testKiwoomConnection()">연결 테스트</button>
+                    <button class="btn btn-secondary" onclick="saveKiwoomSettings()" style="width: 100%; margin-top: 0.5rem;">설정 저장</button>
+                </div>
+
+                <!-- 기타 API 설정 -->
+                <div class="settings-card fade-in">
+                    <h3>📊 기타 데이터 소스</h3>
+                    
+                    <div class="form-group">
+                        <label>한국투자증권 API Key</label>
+                        <div class="api-key-input">
+                            <input type="password" id="kisApiKey" placeholder="한국투자증권 API Key">
+                            <button type="button" class="toggle-visibility" onclick="toggleApiKeyVisibility('kisApiKey')">👁️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>카카오톡 알림 API Key</label>
+                        <div class="api-key-input">
+                            <input type="password" id="kakaoApiKey" placeholder="카카오톡 알림 API Key">
+                            <button type="button" class="toggle-visibility" onclick="toggleApiKeyVisibility('kakaoApiKey')">👁️</button>
+                        </div>
+                    </div>
+                    
+                    <div class="api-status">
+                        <div class="status-indicator" id="otherStatus"></div>
+                        <span id="otherStatusText">연결 안됨</span>
+                    </div>
+                    
+                    <button class="btn btn-primary test-connection" onclick="testOtherConnections()">연결 테스트</button>
+                    <button class="btn btn-secondary" onclick="saveOtherSettings()" style="width: 100%; margin-top: 0.5rem;">설정 저장</button>
+                </div>
+            </div>
+
+            <!-- API 정보 안내 -->
+            <div class="api-info fade-in">
+                <h4>📋 API 설정 안내</h4>
+                <p><strong>키움증권 REST API:</strong></p>
+                <ul>
+                    <li>키움증권 홈페이지에서 REST API 신청 후 App Key와 App Secret을 발급받으세요</li>
+                    <li>Access Token은 OAuth 인증을 통해 발급받을 수 있습니다</li>
+                    <li>실시간 주식 데이터 조회 및 계좌 정보 접근이 가능합니다</li>
+                </ul>
+                <p><strong>한국투자증권 API:</strong></p>
+                <ul>
+                    <li>한국투자증권 KIS API를 통해 추가 데이터를 제공합니다</li>
+                    <li>해외 주식 데이터 및 상세 분석 정보를 제공합니다</li>
+                </ul>
+                <p><strong>카카오톡 알림 API:</strong></p>
+                <ul>
+                    <li>카카오 비즈니스 플랫폼에서 알림톡 API를 신청하세요</li>
+                    <li>매수/매도 목표가 도달 시 즉시 알림을 받을 수 있습니다</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title fade-in">핵심 기능</h2>
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📱</div>
+                    <h3>MTS 연동 업로드</h3>
+                    <p>키움증권, 대신증권, NH투자증권 등 주요 MTS에서 관심종목을 쉽게 업로드하세요.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📊</div>
+                    <h3>상세 종목 분석</h3>
+                    <p>현재가, PER, EPS, PEG 등 15가지 핵심 지표를 실시간으로 모니터링합니다.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🔔</div>
+                    <h3>카카오톡 알림</h3>
+                    <p>매수/매도 목표가 도달 시 즉시 카카오톡으로 알림을 받고 바로 주문할 수 있습니다.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">💰</div>
+                    <h3>자금 관리</h3>
+                    <p>총 운영자금과 사용 가능 자금을 체계적으로 관리하여 투자 계획을 세우세요.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">📈</div>
+                    <h3>시장 동향 분석</h3>
+                    <p>주도 섹터와 주도주를 실시간으로 파악하여 투자 기회를 놓치지 마세요.</p>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">🎯</div>
+                    <h3>맞춤형 목표가</h3>
+                    <p>AI 분석을 바탕으로 개별 종목별 최적의 매수/매도 목표가를 제시합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text fade-in">
+                    <h2>StockWatch Pro 소개</h2>
+                    <p>StockWatch Pro는 2020년 설립된 관심종목 관리 및 매매타이밍 알림 전문 서비스입니다. 개인 투자자들이 놓치기 쉬운 매매 기회를 AI 기술로 포착하여 카카오톡 알림으로 전달합니다.</p>
+                    <p>우리는 MTS 연동을 통해 사용자의 관심종목을 쉽게 업로드할 수 있게 하고, 15가지 핵심 지표를 실시간으로 분석하여 정확한 매수/매도 타이밍을 알려드립니다. 투자의 기회를 놓치지 않도록 돕는 것이 우리의 미션입니다.</p>
+                </div>
+                <div class="stats fade-in">
+                    <div class="stat-item">
+                        <div class="stat-number">8,500+</div>
+                        <div class="stat-label">활성 사용자</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">95.2%</div>
+                        <div class="stat-label">알림 정확도</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">₩1.2조</div>
+                        <div class="stat-label">관리 자산</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">실시간 모니터링</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="contact-content">
+                <h2 class="fade-in">문의하기</h2>
+                <p class="fade-in">AIStock Pro와 함께 스마트한 투자를 시작하세요. 언제든지 문의해주시면 전문 상담사가 도와드리겠습니다.</p>
+                <div class="contact-info">
+                    <div class="contact-item fade-in">
+                        <h3>전화 문의</h3>
+                        <p>02-1234-5678</p>
+                    </div>
+                    <div class="contact-item fade-in">
+                        <h3>이메일</h3>
+                        <p>info@aistockpro.com</p>
+                    </div>
+                    <div class="contact-item fade-in">
+                        <h3>주소</h3>
+                        <p>서울특별시 강남구 테헤란로 123</p>
+                    </div>
+                    <div class="contact-item fade-in">
+                        <h3>운영시간</h3>
+                        <p>평일 09:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 StockWatch Pro. All rights reserved. | 관심종목 관리 & 매매타이밍 알림 서비스</p>
+        </div>
+    </footer>
+
+    <!-- 종목 추가/수정 모달 -->
+    <div id="stockModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStockModal()">&times;</span>
+            <h2 id="modalTitle">종목 추가</h2>
+            <form id="stockForm">
+                <div class="form-group">
+                    <label>종목명</label>
+                    <input type="text" id="stockName" required>
+                </div>
+                <div class="form-group">
+                    <label>종목코드</label>
+                    <input type="text" id="stockCode" required>
+                </div>
+                <div class="form-group">
+                    <label>현재가</label>
+                    <input type="number" id="currentPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>매수목표가</label>
+                    <input type="number" id="buyTarget" required>
+                </div>
+                <div class="form-group">
+                    <label>매도목표가</label>
+                    <input type="number" id="sellTarget" required>
+                </div>
+                <div class="form-group">
+                    <label>알림 설정</label>
+                    <select id="notificationEnabled">
+                        <option value="true">활성화</option>
+                        <option value="false">비활성화</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>수량</label>
+                    <input type="number" id="quantity" required>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeStockModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MTS 업로드 모달 -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUploadModal()">&times;</span>
+            <h2>MTS에서 관심종목 업로드</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <p>📁 파일을 선택하거나 여기에 드래그하세요</p>
+                <p style="font-size: 0.9rem; color: #ccc;">지원 형식: CSV, Excel (.xlsx)</p>
+            </div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx" style="display: none;">
+            
+            <div style="margin-top: 1rem;">
+                <h4>지원하는 MTS</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 0.5rem;">
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
+                        <div style="font-weight: bold; color: #00ffff;">키움증권</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
+                        <div style="font-weight: bold; color: #00ffff;">대신증권</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
+                        <div style="font-weight: bold; color: #00ffff;">NH투자증권</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 255, 255, 0.1); border-radius: 10px;">
+                        <div style="font-weight: bold; color: #00ffff;">한국투자증권</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: right; margin-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="processUpload()">업로드</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let stockData = [
+            {
+                id: 1,
+                name: 'Samsung Electronics',
+                code: '005930',
+                currentPrice: 75000,
+                changeRate: 2.5,
+                marketCap: '450조',
+                per: 12.5,
+                buyTarget: 70000,
+                sellTarget: 80000,
+                notification: true,
+                quantity: 10 /* 데모용 수량 추가 */
+            },
+            {
+                id: 2,
+                name: 'SK Hynix',
+                code: '000660',
+                currentPrice: 95000,
+                changeRate: -1.2,
+                marketCap: '68조',
+                per: 8.3,
+                buyTarget: 90000,
+                sellTarget: 100000,
+                notification: false,
+                quantity: 5 /* 데모용 수량 추가 */
+            },
+            {
+                id: 3, name: 'LG Energy Solution', code: '373220', currentPrice: 400000, changeRate: 1.8, marketCap: '90조', per: 60.1, buyTarget: 380000, sellTarget: 420000, notification: true
+            },
+            {
+                id: 4, name: 'Samsung Biologics', code: '207940', currentPrice: 800000, changeRate: -0.5, marketCap: '55조', per: 100.5, buyTarget: 780000, sellTarget: 830000, notification: false
+            },
+            {
+                id: 5, name: 'Hyundai Motor', code: '005380', currentPrice: 200000, changeRate: 0.7, marketCap: '45조', per: 7.2, buyTarget: 190000, sellTarget: 210000, notification: true
+            },
+            {
+                id: 6, name: 'NAVER', code: '035420', currentPrice: 180000, changeRate: 3.1, marketCap: '30조', per: 35.8, buyTarget: 170000, sellTarget: 190000, notification: true
+            },
+            {
+                id: 7, name: 'Kakao', code: '035720', currentPrice: 50000, changeRate: -0.8, marketCap: '22조', per: 28.3, buyTarget: 48000, sellTarget: 53000, notification: false
+            },
+            {
+                id: 8, name: 'POSCO Holdings', code: '005490', currentPrice: 450000, changeRate: 1.2, marketCap: '38조', per: 5.5, buyTarget: 430000, sellTarget: 470000, notification: true
+            },
+            {
+                id: 9, name: 'LG Chem', code: '051910', currentPrice: 600000, changeRate: -1.0, marketCap: '42조', per: 15.2, buyTarget: 580000, sellTarget: 620000, notification: false
+            },
+            {
+                id: 10, name: 'Samsung SDI', code: '006400', currentPrice: 550000, changeRate: 0.3, marketCap: '35조', per: 20.7, buyTarget: 530000, sellTarget: 570000, notification: true
+            },
+            {
+                id: 11, name: 'Celltrion', code: '068270', currentPrice: 180000, changeRate: 2.1, marketCap: '25조', per: 40.1, buyTarget: 175000, sellTarget: 185000, notification: true
+            },
+            {
+                id: 12, name: 'KB Financial Group', code: '105560', currentPrice: 60000, changeRate: 0.5, marketCap: '28조', per: 5.8, buyTarget: 58000, sellTarget: 62000, notification: true
+            },
+            {
+                id: 13, name: 'Shinhan Financial Group', code: '055550', currentPrice: 45000, changeRate: 0.2, marketCap: '25조', per: 5.1, buyTarget: 44000, sellTarget: 46000, notification: false
+            },
+            {
+                id: 14, name: 'Hyundai Mobis', code: '012330', currentPrice: 230000, changeRate: -0.7, marketCap: '20조', per: 8.9, buyTarget: 220000, sellTarget: 240000, notification: true
+            },
+            {
+                id: 15, name: 'Kakao Bank', code: '323410', currentPrice: 25000, changeRate: 1.5, marketCap: '12조', per: 50.1, buyTarget: 24000, sellTarget: 26000, notification: false
+            },
+            {
+                id: 16, name: 'Korea Electric Power', code: '015760', currentPrice: 20000, changeRate: 0.1, marketCap: '15조', per: -10.2, buyTarget: 19000, sellTarget: 21000, notification: true
+            },
+            {
+                id: 17, name: 'KT&G', code: '033780', currentPrice: 90000, changeRate: -0.3, marketCap: '12조', per: 10.5, buyTarget: 88000, sellTarget: 92000, notification: true
+            },
+            {
+                id: 18, name: 'Samsung C&T', code: '028260', currentPrice: 120000, changeRate: 0.8, marketCap: '20조', per: 9.3, buyTarget: 118000, sellTarget: 125000, notification: false
+            },
+            {
+                id: 19, name: 'LG Electronics', code: '066570', currentPrice: 100000, changeRate: 0.6, marketCap: '16조', per: 11.8, buyTarget: 98000, sellTarget: 102000, notification: true
+            },
+            {
+                id: 20, name: 'SK Telecom', code: '017670', currentPrice: 50000, changeRate: 0.2, marketCap: '14조', per: 9.5, buyTarget: 49000, sellTarget: 51000, notification: false
+            },
+            {
+                id: 21, name: 'NCsoft', code: '036570', currentPrice: 300000, changeRate: -2.1, marketCap: '6조', per: 30.1, buyTarget: 290000, sellTarget: 310000, notification: true
+            },
+            {
+                id: 22, name: 'Hyundai Glovis', code: '086280', currentPrice: 180000, changeRate: 0.4, marketCap: '6조', per: 7.9, buyTarget: 175000, sellTarget: 185000, notification: true
+            },
+            {
+                id: 23, name: 'Hana Financial Group', code: '086790', currentPrice: 40000, changeRate: 0.3, marketCap: '13조', per: 4.8, buyTarget: 39000, sellTarget: 41000, notification: false
+            },
+            {
+                id: 24, name: 'Samsung Fire & Marine Insurance', code: '000810', currentPrice: 200000, changeRate: 0.9, marketCap: '9조', per: 8.5, buyTarget: 195000, sellTarget: 205000, notification: true
+            },
+            {
+                id: 25, name: 'LG Household & Health Care', code: '051900', currentPrice: 700000, changeRate: -1.5, marketCap: '10조', per: 25.1, buyTarget: 680000, sellTarget: 720000, notification: false
+            },
+            {
+                id: 26, name: 'Amorepacific', code: '090430', currentPrice: 150000, changeRate: 1.0, marketCap: '8조', per: 32.7, buyTarget: 145000, sellTarget: 155000, notification: true
+            },
+            {
+                id: 27, name: 'S-Oil', code: '010950', currentPrice: 90000, changeRate: 0.6, marketCap: '10조', per: 6.2, buyTarget: 88000, sellTarget: 92000, notification: true
+            },
+            {
+                id: 28, name: 'KB Kookmin Bank', code: '060000', currentPrice: 50000, changeRate: 0.3, marketCap: '20조', per: 5.0, buyTarget: 49000, sellTarget: 51000, notification: true
+            },
+            {
+                id: 29, name: 'HMM', code: '011200', currentPrice: 20000, changeRate: -0.2, marketCap: '10조', per: 4.5, buyTarget: 19500, sellTarget: 20500, notification: false
+            },
+            {
+                id: 30, name: 'Krafton', code: '259960', currentPrice: 280000, changeRate: 2.5, marketCap: '13조', per: 45.3, buyTarget: 270000, sellTarget: 290000, notification: true
+            },
+            {
+                id: 31, name: 'Netmarble', code: '251270', currentPrice: 80000, changeRate: -1.8, marketCap: '7조', per: -15.1, buyTarget: 78000, sellTarget: 82000, notification: false
+            },
+            {
+                id: 32, name: 'Pearl Abyss', code: '263750', currentPrice: 50000, changeRate: 3.0, marketCap: '3조', per: -20.5, buyTarget: 48000, sellTarget: 52000, notification: true
+            },
+            {
+                id: 33, name: 'Doosan Heavy Industries & Construction', code: '034020', currentPrice: 15000, changeRate: 0.5, marketCap: '5조', per: -5.3, buyTarget: 14500, sellTarget: 15500, notification: false
+            },
+            {
+                id: 34, name: 'Hanwha Solutions', code: '009830', currentPrice: 40000, changeRate: 1.1, marketCap: '7조', per: 10.1, buyTarget: 38000, sellTarget: 42000, notification: true
+            },
+            {
+                id: 35, name: 'SK Innovation', code: '096770', currentPrice: 150000, changeRate: -0.9, marketCap: '14조', per: 7.8, buyTarget: 145000, sellTarget: 155000, notification: false
+            },
+            {
+                id: 36, name: 'LG Uplus', code: '032640', currentPrice: 10000, changeRate: 0.4, marketCap: '4조', per: 8.1, buyTarget: 9800, sellTarget: 10200, notification: true
+            },
+            {
+                id: 37, name: 'Kakao Games', code: '293490', currentPrice: 40000, changeRate: 2.0, marketCap: '3조', per: 22.5, buyTarget: 38000, sellTarget: 42000, notification: true
+            },
+            {
+                id: 38, name: 'E-Mart', code: '139480', currentPrice: 100000, changeRate: -0.5, marketCap: '3조', per: 15.0, buyTarget: 98000, sellTarget: 102000, notification: false
+            },
+            {
+                id: 39, name: 'KT', code: '030200', currentPrice: 30000, changeRate: 0.1, marketCap: '7조', per: 6.5, buyTarget: 29000, sellTarget: 31000, notification: true
+            },
+            {
+                id: 40, name: 'Samsung Electro-Mechanics', code: '009150', currentPrice: 180000, changeRate: 1.3, marketCap: '13조', per: 14.2, buyTarget: 175000, sellTarget: 185000, notification: true
+            },
+            {
+                id: 41, name: 'Lotte Chemical', code: '011170', currentPrice: 150000, changeRate: -0.7, marketCap: '5조', per: -8.9, buyTarget: 145000, sellTarget: 155000, notification: false
+            },
+            {
+                id: 42, name: 'LG Display', code: '034220', currentPrice: 15000, changeRate: 0.8, marketCap: '6조', per: -3.5, buyTarget: 14500, sellTarget: 15500, notification: true
+            },
+            {
+                id: 43, name: 'CJ CheilJedang', code: '097950', currentPrice: 350000, changeRate: 0.6, marketCap: '5조', per: 9.1, buyTarget: 340000, sellTarget: 360000, notification: true
+            },
+            {
+                id: 44, name: 'AhnLab', code: '053800', currentPrice: 70000, changeRate: 2.8, marketCap: '1조', per: 30.0, buyTarget: 68000, sellTarget: 72000, notification: true
+            },
+            {
+                id: 45, name: 'HLB', code: '028300', currentPrice: 50000, changeRate: -3.0, marketCap: '3조', per: -50.1, buyTarget: 48000, sellTarget: 52000, notification: false
+            },
+            {
+                id: 46, name: 'Hanjin KAL', code: '180640', currentPrice: 60000, changeRate: 0.9, marketCap: '3조', per: 12.0, buyTarget: 58000, sellTarget: 62000, notification: true
+            },
+            {
+                id: 47, name: 'Korean Air', code: '003490', currentPrice: 30000, changeRate: 0.7, marketCap: '3조', per: 5.5, buyTarget: 29000, sellTarget: 31000, notification: true
+            },
+            {
+                id: 48, name: 'Samsung Heavy Industries', code: '010140', currentPrice: 5000, changeRate: 1.0, marketCap: '3조', per: -2.1, buyTarget: 4800, sellTarget: 5200, notification: false
+            },
+            {
+                id: 49, name: 'Daewoo Shipbuilding & Marine Engineering', code: '042660', currentPrice: 20000, changeRate: 1.5, marketCap: '2조', per: -1.5, buyTarget: 19000, sellTarget: 21000, notification: true
+            },
+            {
+                id: 50, name: 'Hyundai Heavy Industries', code: '329180', currentPrice: 100000, changeRate: 0.3, marketCap: '8조', per: 7.0, buyTarget: 98000, sellTarget: 102000, notification: true, quantity: 2 /* 데모용 수량 추가 */
+            }
+        ];
+
+        let editingStockId = null;
+
+        // 운영자금 관련 변수 (1,000원 단위)
+        let totalCapital = 10000; // 총 운영자금
+        let cash = 5000;         // 현금
+        let startDate = '2023-01-01'; // 시작일
+        let endDate = new Date().toISOString().slice(0, 10); // 종료일 (오늘 날짜)
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Header background on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(0, 0, 0, 0.98)';
+            } else {
+                header.style.background = 'rgba(0, 0, 0, 0.95)';
+            }
+        });
+
+        // 종목 추가 모달 열기
+        function openAddStockModal() {
+            editingStockId = null;
+            document.getElementById('modalTitle').textContent = '종목 추가';
+            document.getElementById('stockForm').reset();
+            document.getElementById('stockModal').style.display = 'block';
+        }
+
+        // 종목 수정 모달 열기
+        function editStock(id) {
+            const stock = stockData.find(s => s.id === id);
+            if (stock) {
+                editingStockId = id;
+                document.getElementById('modalTitle').textContent = '종목 수정';
+                document.getElementById('stockName').value = stock.name;
+                document.getElementById('stockCode').value = stock.code;
+                document.getElementById('currentPrice').value = stock.currentPrice;
+                document.getElementById('buyTarget').value = stock.buyTarget;
+                document.getElementById('sellTarget').value = stock.sellTarget;
+                document.getElementById('notificationEnabled').value = stock.notification;
+                document.getElementById('quantity').value = stock.quantity;
+                document.getElementById('stockModal').style.display = 'block';
+            }
+        }
+
+        // 종목 삭제
+        function deleteStock(id) {
+            if (confirm('정말로 이 종목을 삭제하시겠습니까?')) {
+                stockData = stockData.filter(s => s.id !== id);
+                updateStockTable();
+                updateDashboard(); // 대시보드 업데이트
+            }
+        }
+
+        // 종목 모달 닫기
+        function closeStockModal() {
+            document.getElementById('stockModal').style.display = 'none';
+        }
+
+        // 업로드 모달 열기
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+
+        // 업로드 모달 닫기
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+        }
+
+        // 파일 업로드 처리
+        function processUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+
+            // 실제 구현에서는 서버로 파일을 전송하고 파싱
+            alert('파일 업로드가 완료되었습니다. (데모용)');
+            closeUploadModal();
+        }
+
+        // 데이터 새로고침
+        function refreshData() {
+            // 실제 구현에서는 서버에서 최신 데이터를 가져옴
+            alert('데이터가 새로고침되었습니다.');
+            updateStockTable();
+            updateDashboard(); // 대시보드 업데이트
+        }
+
+        // 종목 테이블 업데이트
+        function updateStockTable() {
+            const tbody = document.getElementById('stockTableBody');
+            tbody.innerHTML = '';
+
+            stockData.forEach(stock => {
+                const row = document.createElement('tr');
+                const changeClass = stock.changeRate >= 0 ? 'positive' : 'negative';
+                const notificationIcon = stock.notification ? 
+                    '<span style="color: #00ff00;">✓</span>' : 
+                    '<span style="color: #ff4444;">✗</span>';
+
+                // 시가총액 포맷 변경
+                let formattedMarketCap = '';
+                if (typeof stock.marketCap === 'string') {
+                    const value = parseFloat(stock.marketCap.replace('조', '').replace('억', '')) || 0;
+                    if (stock.marketCap.includes('조')) {
+                        formattedMarketCap = `${value.toFixed(1)}`; // 소수점 첫째 자리
+                    } else if (stock.marketCap.includes('억')) {
+                        formattedMarketCap = `${(value / 10000).toFixed(1)}`; // 억 단위를 조 단위로 변환 후 소수점 첫째 자리
+                    } else {
+                        formattedMarketCap = `${(value / 1000000000000).toFixed(1)}`; // 숫자를 조 단위로 변환 후 소수점 첫째 자리
+                    }
+                } else if (typeof stock.marketCap === 'number') {
+                    formattedMarketCap = `${(stock.marketCap / 1000000000000).toFixed(1)}`;
+                }
+                
+                row.innerHTML = `
+                    <td>${stock.name}</td>
+                    <td>${stock.currentPrice.toLocaleString()}</td>
+                    <td class="${changeClass}">${stock.changeRate >= 0 ? '+' : ''}${stock.changeRate}%</td>
+                    <td>${formattedMarketCap}</td>
+                    <td>${stock.per}</td>
+                    <td>${stock.buyTarget.toLocaleString()}</td>
+                    <td>${stock.sellTarget.toLocaleString()}</td>
+                    <td>${notificationIcon}</td>
+                    <td>
+                        <button class="btn btn-secondary" onclick="editStock(${stock.id})">수정</button>
+                        <button class="btn btn-danger" onclick="deleteStock(${stock.id})">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 종목 폼 제출 처리
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('stockName').value,
+                code: document.getElementById('stockCode').value,
+                currentPrice: parseInt(document.getElementById('currentPrice').value),
+                buyTarget: parseInt(document.getElementById('buyTarget').value),
+                sellTarget: parseInt(document.getElementById('sellTarget').value),
+                notification: document.getElementById('notificationEnabled').value === 'true',
+                quantity: parseInt(document.getElementById('quantity').value)
+            };
+
+            if (editingStockId) {
+                // 수정
+                const index = stockData.findIndex(s => s.id === editingStockId);
+                if (index !== -1) {
+                    stockData[index] = { ...stockData[index], ...formData };
+                }
+            } else {
+                // 추가
+                const newId = Math.max(...stockData.map(s => s.id)) + 1;
+                stockData.push({
+                    id: newId,
+                    ...formData,
+                    changeRate: (Math.random() - 0.5) * 10, // 데모용 랜덤 등락율
+                    marketCap: (Math.random() * 50 + 1).toFixed(2) + '조', // 데모용
+                    per: (Math.random() * 20 + 5).toFixed(1) // 데모용
+                });
+            }
+
+            updateStockTable();
+            closeStockModal();
+        });
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', function(event) {
+            const stockModal = document.getElementById('stockModal');
+            const uploadModal = document.getElementById('uploadModal');
+            
+            if (event.target === stockModal) {
+                closeStockModal();
+            }
+            if (event.target === uploadModal) {
+                closeUploadModal();
+            }
+        });
+
+        // 파일 드래그 앤 드롭
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#00ffff';
+            uploadArea.style.background = 'rgba(0, 255, 255, 0.1)';
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(0, 255, 255, 0.5)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(0, 255, 255, 0.5)';
+            uploadArea.style.background = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+            }
+        });
+
+        // API 키 표시/숨기기 토글
+        function toggleApiKeyVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+
+        // 키움증권 API 연결 테스트
+        function testKiwoomConnection() {
+            const appKey = document.getElementById('kiwoomAppKey').value;
+            const appSecret = document.getElementById('kiwoomAppSecret').value;
+            const accessToken = document.getElementById('kiwoomAccessToken').value;
+            
+            if (!appKey || !appSecret || !accessToken) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            // 연결 테스트 시뮬레이션
+            const statusIndicator = document.getElementById('kiwoomStatus');
+            const statusText = document.getElementById('kiwoomStatusText');
+            
+            statusIndicator.style.background = '#ffaa00';
+            statusText.textContent = '연결 테스트 중...';
+            
+            setTimeout(() => {
+                // 실제 구현에서는 키움증권 API를 호출하여 연결 테스트
+                const isConnected = Math.random() > 0.3; // 70% 성공률로 시뮬레이션
+                
+                if (isConnected) {
+                    statusIndicator.classList.add('connected');
+                    statusIndicator.style.background = '#00ff00';
+                    statusText.textContent = '연결 성공';
+                    alert('키움증권 API 연결이 성공했습니다!');
+                } else {
+                    statusIndicator.classList.remove('connected');
+                    statusIndicator.style.background = '#ff4444';
+                    statusText.textContent = '연결 실패';
+                    alert('키움증권 API 연결에 실패했습니다. API 키를 확인해주세요.');
+                }
+            }, 2000);
+        }
+
+        // 기타 API 연결 테스트
+        function testOtherConnections() {
+            const kisApiKey = document.getElementById('kisApiKey').value;
+            const kakaoApiKey = document.getElementById('kakaoApiKey').value;
+            
+            if (!kisApiKey && !kakaoApiKey) {
+                alert('최소 하나의 API 키를 입력해주세요.');
+                return;
+            }
+
+            const statusIndicator = document.getElementById('otherStatus');
+            const statusText = document.getElementById('otherStatusText');
+            
+            statusIndicator.style.background = '#ffaa00';
+            statusText.textContent = '연결 테스트 중...';
+            
+            setTimeout(() => {
+                const isConnected = Math.random() > 0.2; // 80% 성공률로 시뮬레이션
+                
+                if (isConnected) {
+                    statusIndicator.classList.add('connected');
+                    statusIndicator.style.background = '#00ff00';
+                    statusText.textContent = '연결 성공';
+                    alert('API 연결이 성공했습니다!');
+                } else {
+                    statusIndicator.classList.remove('connected');
+                    statusIndicator.style.background = '#ff4444';
+                    statusText.textContent = '연결 실패';
+                    alert('API 연결에 실패했습니다. API 키를 확인해주세요.');
+                }
+            }, 2000);
+        }
+
+        // 키움증권 설정 저장
+        function saveKiwoomSettings() {
+            const appKey = document.getElementById('kiwoomAppKey').value;
+            const appSecret = document.getElementById('kiwoomAppSecret').value;
+            const accessToken = document.getElementById('kiwoomAccessToken').value;
+            
+            if (!appKey || !appSecret || !accessToken) {
+                alert('모든 필드를 입력해주세요.');
+                return;
+            }
+
+            // 실제 구현에서는 서버에 API 키를 안전하게 저장
+            const settings = {
+                kiwoom: {
+                    appKey: appKey,
+                    appSecret: appSecret,
+                    accessToken: accessToken,
+                    savedAt: new Date().toISOString()
+                }
+            };
+            
+            localStorage.setItem('apiSettings', JSON.stringify(settings));
+            alert('키움증권 API 설정이 저장되었습니다!');
+        }
+
+        // 기타 설정 저장
+        function saveOtherSettings() {
+            const kisApiKey = document.getElementById('kisApiKey').value;
+            const kakaoApiKey = document.getElementById('kakaoApiKey').value;
+            
+            if (!kisApiKey && !kakaoApiKey) {
+                alert('최소 하나의 API 키를 입력해주세요.');
+                return;
+            }
+
+            const settings = JSON.parse(localStorage.getItem('apiSettings') || '{}');
+            settings.other = {
+                kisApiKey: kisApiKey,
+                kakaoApiKey: kakaoApiKey,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('apiSettings', JSON.stringify(settings));
+            alert('API 설정이 저장되었습니다!');
+        }
+
+        // 저장된 설정 로드
+        function loadSavedSettings() {
+            const settings = JSON.parse(localStorage.getItem('apiSettings') || '{}');
+            
+            if (settings.kiwoom) {
+                document.getElementById('kiwoomAppKey').value = settings.kiwoom.appKey || '';
+                document.getElementById('kiwoomAppSecret').value = settings.kiwoom.appSecret || '';
+                document.getElementById('kiwoomAccessToken').value = settings.kiwoom.accessToken || '';
+            }
+            
+            if (settings.other) {
+                document.getElementById('kisApiKey').value = settings.other.kisApiKey || '';
+                document.getElementById('kakaoApiKey').value = settings.other.kakaoApiKey || '';
+            }
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStockTable();
+            loadSavedSettings();
+            updateDashboard(); // 초기 대시보드 업데이트
+
+            // 운영자금 관련 입력 필드 이벤트 리스너
+            document.getElementById('totalCapitalInput').addEventListener('change', function() {
+                totalCapital = parseInt(this.value) || 0;
+                updateDashboard();
+            });
+            document.getElementById('cashInput').addEventListener('change', function() {
+                cash = parseInt(this.value) || 0;
+                updateDashboard();
+            });
+            document.getElementById('startDateInput').addEventListener('change', function() {
+                startDate = this.value;
+                updateDashboard();
+            });
+            document.getElementById('endDateInput').addEventListener('change', function() {
+                endDate = this.value;
+                updateDashboard();
+            });
+
+            // 조회 버튼 이벤트 리스너
+            document.getElementById('inquiryButton').addEventListener('click', function() {
+                updateDashboard();
+            });
+        });
+
+        // 테이블 정렬 기능
+        function sortTable(key) {
+            const headers = document.querySelectorAll('.stock-table th[data-sort-key]');
+            let currentOrder = 'asc';
+
+            headers.forEach(header => {
+                if (header.dataset.sortKey === key) {
+                    currentOrder = header.dataset.sortOrder === 'asc' ? 'desc' : 'asc';
+                    header.dataset.sortOrder = currentOrder;
+                } else {
+                    header.dataset.sortOrder = 'none'; // 다른 컬럼은 초기화
+                }
+                // 모든 sort-arrow 초기화
+                const arrow = header.querySelector('.sort-arrow');
+                if (arrow) {
+                    arrow.classList.remove('asc', 'desc');
+                }
+            });
+
+            // 현재 정렬 컬럼의 sort-arrow 업데이트
+            const activeHeader = document.querySelector(`.stock-table th[data-sort-key="${key}"]`);
+            if (activeHeader) {
+                const activeArrow = activeHeader.querySelector('.sort-arrow');
+                if (activeArrow) {
+                    activeArrow.classList.add(currentOrder);
+                }
+            }
+
+            stockData.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+
+                // 숫자형 데이터 처리 (marketCap, per, currentPrice, changeRate, buyTarget, sellTarget)
+                if (['currentPrice', 'changeRate', 'per', 'buyTarget', 'sellTarget'].includes(key)) {
+                    valA = parseFloat(String(valA).replace(/[^0-9.-]+/g, ''));
+                    valB = parseFloat(String(valB).replace(/[^0-9.-]+/g, ''));
+                } else if (key === 'marketCap') {
+                    const parseMarketCap = (capStr) => {
+                        if (typeof capStr !== 'string') return parseFloat(capStr) || 0;
+                        let value = parseFloat(capStr.replace('조', '').replace('억', '')) || 0;
+                        if (capStr.includes('조')) return value;
+                        if (capStr.includes('억')) return value / 10000;
+                        return value / 1000000000000; // 숫자를 조 단위로 변환
+                    };
+                    valA = parseMarketCap(valA);
+                    valB = parseMarketCap(valB);
+                }
+
+                if (valA < valB) {
+                    return currentOrder === 'asc' ? -1 : 1;
+                } else if (valA > valB) {
+                    return currentOrder === 'asc' ? 1 : -1;
+                } else {
+                    return 0;
+                }
+            });
+
+            updateStockTable();
+        }
+
+        // 각 헤더에 클릭 이벤트 리스너 추가
+        document.querySelectorAll('.stock-table th[data-sort-key]').forEach(header => {
+            header.addEventListener('click', () => sortTable(header.dataset.sortKey));
+        });
+
+        // 초기 정렬 (종목명 오름차순)
+        sortTable('name');
+
+        // 대시보드 업데이트 함수
+        function updateDashboard() {
+            const totalValuationInput = document.getElementById('totalValuationInput');
+            const cashInput = document.getElementById('cashInput');
+            const stockValuationSumInput = document.getElementById('stockValuationSumInput');
+            const returnRateInput = document.getElementById('returnRateInput');
+            const startDateInput = document.getElementById('startDateInput');
+            const endDateInput = document.getElementById('endDateInput');
+
+            // 현금 입력 필드에 현재 현금 값 설정
+            cashInput.value = cash.toLocaleString();
+            document.getElementById('totalCapitalInput').value = totalCapital.toLocaleString();
+
+            // 주식 평가 합계 계산
+            let stockValuationSum = 0;
+            stockData.forEach(stock => {
+                stockValuationSum += (stock.currentPrice * stock.quantity) / 1000; // 1,000원 단위
+            });
+            stockValuationSumInput.value = stockValuationSum.toLocaleString();
+
+            // 총 평가액 계산 (현금 + 주식평가합계)
+            const totalValuation = cash + stockValuationSum;
+            totalValuationInput.value = totalValuation.toLocaleString();
+
+            // 수익률 계산 (여기서는 간단한 예시, 실제 수익률 로직은 더 복잡할 수 있음)
+            // (현재 총 평가액 - 초기 총 운영자금) / 초기 총 운영자금 * 100
+            const initialTotalCapital = 10000; // 초기 총 운영자금 (예시)
+            const returnRate = ((totalValuation - initialTotalCapital) / initialTotalCapital * 100).toFixed(2);
+            returnRateInput.value = `${returnRate}%`;
+
+            // 날짜 입력 필드 설정
+            startDateInput.value = startDate;
+            endDateInput.value = endDate;
+        }
+    </script>
+</body>
+</html>
