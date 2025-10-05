@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Just One AI - 관심종목 관리 & 매매타이밍 알림 서비스</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: #fff;
+            color: #333;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header .logo {
+            float: left;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        header .nav-links {
+            float: right;
+            list-style: none;
+        }
+
+        header .nav-links li {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        header .nav-links a {
+            color: #555;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        header .nav-links a:hover {
+            color: #007bff;
+        }
+
+        /* Hero Section */
+        #home {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://source.unsplash.com/1600x900/?stock-market') no-repeat center center/cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+        }
+
+        #home .hero-content {
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        #home h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        #home p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease-out 0.3s;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: #007bff;
+            color: #fff;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            transition: background 0.3s ease, transform 0.3s ease;
+            animation: zoomIn 1s ease-out 0.6s;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        #features {
+            padding: 80px 0;
+            background: #fdfdfd;
+            text-align: center;
+        }
+
+        #features h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            position: relative;
+            display: inline-block;
+        }
+
+        #features h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #007bff;
+            border-radius: 2px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-item {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .feature-item i {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .feature-item p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* How It Works Section */
+        #how-it-works {
+            padding: 80px 0;
+            background: #e9ecef;
+            text-align: center;
+        }
+
+        #how-it-works h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            position: relative;
+            display: inline-block;
+        }
+
+        #how-it-works h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #007bff;
+            border-radius: 2px;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 0;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #007bff;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -17px;
+            background-color: white;
+            border: 4px solid #007bff;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .timeline-item.left {
+            left: 0;
+        }
+
+        .timeline-item.right {
+            left: 50%;
+        }
+
+        .timeline-item.left::after {
+            left: -16px;
+        }
+
+        .timeline-item.right::after {
+            left: -16px;
+        }
+
+        .timeline-item .content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            text-align: left;
+        }
+
+        /* Contact Section */
+        #contact {
+            padding: 80px 0;
+            background: #fdfdfd;
+            text-align: center;
+        }
+
+        #contact h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #2c3e50;
+            position: relative;
+            display: inline-block;
+        }
+
+        #contact h2::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -10px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #007bff;
+            border-radius: 2px;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .contact-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .contact-form label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .contact-form input[type="text"],
+        .contact-form input[type="email"],
+        .contact-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .contact-form input[type="text"]:focus,
+        .contact-form input[type="email"]:focus,
+        .contact-form textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .contact-form button {
+            background: #007bff;
+            color: #fff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .contact-form button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            margin: 0;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes zoomIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            header .logo {
+                float: none;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            header .nav-links {
+                float: none;
+                text-align: center;
+                padding: 10px 0;
+            }
+
+            header .nav-links li {
+                display: block;
+                margin: 10px 0;
+            }
+
+            #home h1 {
+                font-size: 3rem;
+            }
+
+            #home p {
+                font-size: 1.2rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::after {
+                left: 31px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+
+            .timeline-item::before {
+                left: 60px;
+                border: medium solid white;
+                border-width: 10px 0 10px 10px;
+                border-color: transparent transparent transparent #007bff;
+            }
+
+            .timeline-item.right {
+                left: 0%;
+            }
+
+            .timeline-item.left::after,
+            .timeline-item.right::after {
+                left: 15px;
+            }
+
+            .timeline-item .content {
+                text-align: left;
+            }
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">Just One AI</div>
+            <ul class="nav-links">
+                <li><a href="#home">홈</a></li>
+                <li><a href="#features">기능</a></li>
+                <li><a href="#how-it-works">작동 방식</a></li>
+                <li><a href="#about">회사 소개</a></li>
+                <li><a href="#contact">문의</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home">
+        <div class="hero-content">
+            <h1>AI 기반 주식 매매 타이밍, Just One AI가 알려드립니다.</h1>
+            <p>개인 투자자를 위한 최적의 관심종목 관리 및 실시간 매매 타이밍 알림 서비스</p>
+            <a href="#features" class="btn-primary">지금 시작하기</a>
+        </div>
+    </section>
+
+    <section id="features">
+        <div class="container">
+            <h2>주요 기능</h2>
+            <div class="feature-grid">
+                <div class="feature-item fade-in">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>AI 매매 타이밍 분석</h3>
+                    <p>정교한 AI 알고리즘이 15가지 핵심 지표를 분석하여 최적의 매수/매도 타이밍을 제공합니다.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <i class="fas fa-bell"></i>
+                    <h3>카카오톡 실시간 알림</h3>
+                    <p>AI가 포착한 매매 기회를 놓치지 않도록 카카오톡으로 즉시 알림을 보내드립니다.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <i class="fas fa-list-alt"></i>
+                    <h3>스마트 관심종목 관리</h3>
+                    <p>MTS 연동을 통해 간편하게 관심종목을 업로드하고 효율적으로 관리할 수 있습니다.</p>
+                </div>
+                <div class="feature-item fade-in">
+                    <i class="fas fa-database"></i>
+                    <h3>빅데이터 기반 분석</h3>
+                    <p>방대한 주식 시장 데이터를 기반으로 신뢰도 높은 분석 결과를 제공하여 투자 성공률을 높입니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works">
+        <div class="container">
+            <h2>Just One AI 작동 방식</h2>
+            <div class="timeline">
+                <div class="timeline-item left fade-in">
+                    <div class="content">
+                        <h3>1단계: 관심종목 업로드</h3>
+                        <p>사용하던 증권사의 MTS와 연동하여 관심종목을 Just One AI에 간편하게 업로드합니다.</p>
+                    </div>
+                </div>
+                <div class="timeline-item right fade-in">
+                    <div class="content">
+                        <h3>2단계: AI 실시간 분석</h3>
+                        <p>업로드된 관심종목에 대해 AI가 15가지 핵심 지표를 실시간으로 분석합니다.</p>
+                    </div>
+                </div>
+                <div class="timeline-item left fade-in">
+                    <div class="content">
+                        <h3>3단계: 매매 타이밍 포착</h3>
+                        <p>AI가 최적의 매수/매도 타이밍을 포착하면 사용자에게 즉시 알림을 준비합니다.</p>
+                    </div>
+                </div>
+                <div class="timeline-item right fade-in">
+                    <div class="content">
+                        <h3>4단계: 카카오톡 알림 발송</h3>
+                        <p>포착된 매매 타이밍을 카카오톡으로 실시간 알림하여 투자 기회를 놓치지 않도록 돕습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="container">
+            <h2>회사 소개</h2>
+            <div class="about-content">
+                <div class="about-text fade-in">
+                    <h2>Just One AI 소개</h2>
+                    <p>Just One AI는 2020년 설립된 관심종목 관리 및 매매타이밍 알림 전문 서비스입니다. 개인 투자자들이 놓치기 쉬운 매매 기회를 AI 기술로 포착하여 카카오톡 알림으로 전달합니다.</p>
+                    <p>우리는 MTS 연동을 통해 사용자의 관심종목을 쉽게 업로드할 수 있게 하고, 15가지 핵심 지표를 실시간으로 분석하여 정확한 매수/매도 타이밍을 알려드립니다. 투자의 기회를 놓치지 않도록 돕는 것이 우리의 미션입니다.</p>
+                </div>
+                <div class="about-image fade-in">
+                    <img src="https://source.unsplash.com/600x400/?teamwork" alt="회사 팀워크">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container">
+            <h2>문의하기</h2>
+            <div class="contact-form fade-in">
+                <form action="#" method="POST">
+                    <div class="form-group">
+                        <label for="name">이름</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">메시지</label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">문의 보내기</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Just One AI. All rights reserved. | 관심종목 관리 & 매매타이밍 알림 서비스</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const faders = document.querySelectorAll('.fade-in');
+            const appearOptions = {
+                threshold: 0.5
+            };
+            const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) {
+                        return;
+                    } else {
+                        entry.target.classList.add('appear');
+                        appearOnScroll.unobserve(entry.target);
+                    }
+                });
+            }, appearOptions);
+
+            faders.forEach(fader => {
+                appearOnScroll.observe(fader);
+            });
+        });
+    </script>
+</body>
+</html>
